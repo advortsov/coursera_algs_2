@@ -1,0 +1,13 @@
+adjacent
+vertice
+graph degree
+sparse
+dense
+passage
+consider
+fewest number of vertices
+bipartite Двудольный граф
+
+====
+
+digraph орграф
