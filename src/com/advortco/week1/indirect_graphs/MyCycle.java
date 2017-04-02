@@ -1,4 +1,4 @@
-package com.advortco.indirect_graphs;
+package com.advortco.week1.indirect_graphs;
 
 import edu.princeton.cs.algs4.Graph;
 

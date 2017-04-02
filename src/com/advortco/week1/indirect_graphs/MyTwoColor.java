@@ -1,11 +1,6 @@
-package com.advortco.indirect_graphs;
+package com.advortco.week1.indirect_graphs;
 
 import edu.princeton.cs.algs4.Graph;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * @author aldvc

@@ -1,4 +1,4 @@
-package com.advortco.directed_graphs;
+package com.advortco.week1.directed_graphs;
 
 import edu.princeton.cs.algs4.Digraph;
 

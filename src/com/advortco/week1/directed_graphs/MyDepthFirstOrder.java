@@ -1,8 +1,6 @@
-package com.advortco.directed_graphs;
+package com.advortco.week1.directed_graphs;
 
-import edu.princeton.cs.algs4.DepthFirstOrder;
 import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.Graph;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.Stack;
 

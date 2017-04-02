@@ -1,8 +1,6 @@
-package com.advortco.indirect_graphs;
+package com.advortco.week1.indirect_graphs;
 
 import edu.princeton.cs.algs4.Bag;
-import edu.princeton.cs.algs4.BreadthFirstPaths;
-import edu.princeton.cs.algs4.DepthFirstPaths;
 
 /**
  * DFS - deep-first search
