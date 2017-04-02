@@ -108,6 +108,14 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
+
+
+        WordNet wordnet = new WordNet("wordnet/synsets.txt", "wordnet/hypernyms.txt");
+        System.out.println(wordnet.distance("table", "bed"));
+
+        for (int i = 0; i < 1000; i++)
+            System.out.println(wordnet.sap("table", "bed"));
+
     }
 
 

@@ -4,6 +4,7 @@ import edu.princeton.cs.algs4.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * @author advortco
@@ -67,12 +68,34 @@ public class SAP {
 
      */
     public int ancestor(int x, int y) {
-        /*
-        to run two breadth-first searches in G starting from x and from y, thereby computing
-            the distance of each synset from x and from y.
-         */
-        BreadthFirstDirectedPaths bfdpX = new BreadthFirstDirectedPaths(digraph, x);
-        BreadthFirstDirectedPaths bfdpY = new BreadthFirstDirectedPaths(digraph, y);
+
+        BreadthFirstDirectedPaths bfdpX = null;
+        BreadthFirstDirectedPaths bfdpY = null;
+
+        ExecutorService service = null;
+
+        long start = System.currentTimeMillis();
+        try {
+            service = Executors.newFixedThreadPool(2);
+            Callable<BreadthFirstDirectedPaths> callX = () -> new BreadthFirstDirectedPaths(digraph, x);
+            Callable<BreadthFirstDirectedPaths> callY = () -> new BreadthFirstDirectedPaths(digraph, y);
+            Future<?> result1 = service.submit(callX);
+            Future<?> result2 = service.submit(callY);
+            bfdpX = (BreadthFirstDirectedPaths) result1.get();
+            bfdpY = (BreadthFirstDirectedPaths) result2.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            if (service != null) service.shutdown();
+        }
+
+
+//        /*
+//        to run two breadth-first searches in G starting from x and from y, thereby computing
+//            the distance of each synset from x and from y.
+//         */
+//        bfdpX = new BreadthFirstDirectedPaths(digraph, x);
+//        bfdpY = new BreadthFirstDirectedPaths(digraph, y);
 
 //        int[] reachable from x and from y = new
         // Then, for each synset reachable from x and from y, sum the two distances,
@@ -92,6 +115,8 @@ public class SAP {
          Finally, take the  minimum of these sums and subtract two. (Or, instead of subtracting two, in each distance
         computation avoid counting the first edge.)
          */
+
+        System.out.println("ancestor time, ms: " + (System.currentTimeMillis() - start));
         return ancestorIndx;
     }
 
@@ -116,8 +141,30 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+        long start = System.currentTimeMillis();
+
         BreadthFirstDirectedPaths bfdpX = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths bfdpY = new BreadthFirstDirectedPaths(digraph, w);
+
+//        BreadthFirstDirectedPaths bfdpX = null;
+//        BreadthFirstDirectedPaths bfdpY = null;
+//
+//        ExecutorService service = null;
+//
+//        try {
+//            service = Executors.newFixedThreadPool(2);
+//            Callable<BreadthFirstDirectedPaths> callX = () -> new BreadthFirstDirectedPaths(digraph, v);
+//            Callable<BreadthFirstDirectedPaths> callY = () -> new BreadthFirstDirectedPaths(digraph, w);
+//            Future<?> result1 = service.submit(callX);
+//            Future<?> result2 = service.submit(callY);
+//            bfdpX = (BreadthFirstDirectedPaths) result1.get();
+//            bfdpY = (BreadthFirstDirectedPaths) result2.get();
+//        } catch (InterruptedException | ExecutionException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (service != null) service.shutdown();
+//        }
+
 
         int minDist = Integer.MAX_VALUE;
         int ancestorIndx = -1;
@@ -130,6 +177,8 @@ public class SAP {
                 }
             }
         }
+        System.out.println("ancestor iterable time, ms: " + (System.currentTimeMillis() - start));
+
         return ancestorIndx;
     }
 
