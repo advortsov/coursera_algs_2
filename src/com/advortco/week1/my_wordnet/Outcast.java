@@ -1,4 +1,4 @@
-package com.my_wordnet;
+package com.advortco.week1.my_wordnet;
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;

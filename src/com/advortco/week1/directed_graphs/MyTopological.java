@@ -17,7 +17,7 @@ public class MyTopological {
 
         if (!cycleFinder.hasCycle()) {
             MyDepthFirstOrder dfs = new MyDepthFirstOrder(digraph);
-            order = dfs.getReversePost();
+            order = dfs.reversePost();
         }
     }
 

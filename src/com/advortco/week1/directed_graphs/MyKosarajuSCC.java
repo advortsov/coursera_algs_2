@@ -14,7 +14,7 @@ public class MyKosarajuSCC {
         visited = new boolean[G.V()];
         id = new int[G.V()];
         MyDepthFirstOrder order = new MyDepthFirstOrder(G);
-        for (int s : order.getReversePost()) {
+        for (int s : order.reversePost()) {
             if (!visited[s]) {
                 dfs(G, s);
                 currComponentId++;

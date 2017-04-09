@@ -4,12 +4,12 @@ package com.advortco.week2.weighted_graphs;
  * @author aldvc
  * @date 02.04.2017.
  */
-public class Edge implements Comparable<Edge> {
+public class MyEdge implements Comparable<MyEdge> {
     private final int v;
     private final int w;
     private final double weight;
 
-    public Edge(int v, int w, double weight) {
+    public MyEdge(int v, int w, double weight) {
         this.v = v;
         this.w = w;
         this.weight = weight;
@@ -29,7 +29,7 @@ public class Edge implements Comparable<Edge> {
 
 
     @Override
-    public int compareTo(Edge anotherEdge) {
+    public int compareTo(MyEdge anotherEdge) {
         if (this.weight > anotherEdge.weight) return 1;
         else if (this.weight < anotherEdge.weight) return -1;
         else return 0;

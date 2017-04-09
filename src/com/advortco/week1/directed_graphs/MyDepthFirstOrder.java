@@ -28,7 +28,6 @@ public class MyDepthFirstOrder {
                 dfs(digraph, v);
             }
         }
-
     }
 
     private void dfs(Digraph digraph, int v) {
@@ -52,7 +51,7 @@ public class MyDepthFirstOrder {
         return post;
     }
 
-    public Stack<Integer> getReversePost() {
+    public Stack<Integer> reversePost() {
         return reversePost;
     }
 }

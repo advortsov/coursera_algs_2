@@ -6,14 +6,14 @@ import edu.princeton.cs.algs4.IndexMinPQ;
  * @author aldvc
  * @date 03.04.2017.
  */
-public class EagerPrimMST {
-    private Edge[] edgeTo; // кратчайшее ребро из вершины дерева
+public class MyEagerPrimMST {
+    private MyEdge[] edgeTo; // кратчайшее ребро из вершины дерева
     private double[] distTo; // distTo[w] = edgeTo[w].weight()
     private boolean[] included; // true, если v включена в дерево
     private IndexMinPQ<Double> pq; // пригодные перекрестные ребра
 
-    public EagerPrimMST(EdgeWeightedGraph G) {
-        edgeTo = new Edge[G.V()];
+    public MyEagerPrimMST(MyEdgeWeightedGraph G) {
+        edgeTo = new MyEdge[G.V()];
         distTo = new double[G.V()];
         included = new boolean[G.V()];
 
@@ -29,9 +29,9 @@ public class EagerPrimMST {
 
     }
 
-    private void visit(EdgeWeightedGraph G, int v) {
+    private void visit(MyEdgeWeightedGraph G, int v) {
         included[v] = true;
-        for (Edge e : G.adj(v)) {
+        for (MyEdge e : G.adj(v)) {
             int w = e.other(v);
             if (included[w]) continue;
             if (e.getWeight() < distTo[w]) {
@@ -47,7 +47,7 @@ public class EagerPrimMST {
     }
 
     // 4.3.21
-    public Iterable<Edge> edges() {
+    public Iterable<MyEdge> edges() {
         return null;
     }
 
