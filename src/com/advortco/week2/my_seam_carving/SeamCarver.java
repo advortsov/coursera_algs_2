@@ -1,9 +1,7 @@
 package com.advortco.week2.my_seam_carving;
 
-import edu.princeton.cs.algs4.DirectedEdge;
-import edu.princeton.cs.algs4.EdgeWeightedDigraph;
+import edu.princeton.cs.algs4.IndexMinPQ;
 import edu.princeton.cs.algs4.Picture;
-import edu.princeton.cs.algs4.StdOut;
 
 import java.awt.*;
 
@@ -12,95 +10,148 @@ import java.awt.*;
  * @date 09.04.2017.
  */
 public class SeamCarver {
-    private Picture picture;
-    private double[][] gradient;
-
+    private int[][] colorMatrix;
+    private int width, height;
 
     public SeamCarver(Picture picture) {
-        this.picture = picture;
-        this.gradient = new double[picture.height()][picture.width()];
-
-        //
-        System.out.println("Gradient table:");
-        for (int r = 0; r < picture.height(); r++) {
-            for (int c = 0; c < picture.width(); c++) {
-                gradient[r][c] = energy(c, r);
-                StdOut.printf("[%.2f] ", gradient[r][c]);
+        width = picture.width();
+        height = picture.height();
+        colorMatrix = new int[width][height];
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) {
+                colorMatrix[x][y] = picture.get(x, y).getRGB();
             }
-            System.out.println();
-        }
-        System.out.println();
-
-        int definition = picture.height() * picture.width();
-        EdgeWeightedDigraph G = new EdgeWeightedDigraph(definition);
-        for (int pixel = 0; pixel < definition; pixel++) {
-
-            DirectedEdge left = null;
-            DirectedEdge middle = null;
-            DirectedEdge right = null;
-
-            int r = pixel / width();
-            int c = pixel % width();
-            double weight = gradient[r][c];
-
-            if ((pixel + width() + 1 < definition) && (pixel + width() - 1) >= width()) { // DOESNT situated in the current row
-                left = new DirectedEdge(
-                        pixel,
-                        pixel + width() - 1,
-                        weight);
-            }
-
-            if ((pixel + width()) < definition) { // has next row
-                middle = new DirectedEdge(
-                        pixel,
-                        pixel + width(),
-                        weight);
-            }
-
-            if ((pixel + width() + 1 < definition) && (pixel == 0 || pixel % (width() - 1) != 0)) { // last pixel in the row
-                right = new DirectedEdge(
-                        pixel,
-                        pixel + width() + 1,
-                        weight);
-            }
-
-            if (left != null) {
-                G.addEdge(left);
-            }
-
-
-            if (middle != null) {
-                G.addEdge(middle);
-            }
-
-
-            if (right != null) {
-                G.addEdge(right);
-            }
-
-        }
-
-
-        System.out.println(G);
-
     }
 
-
-    public int height() {
-        return picture.height();
+    // current picture
+    public Picture picture() {
+        Picture pic = new Picture(width, height);
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) {
+                pic.set(x, y, new Color(colorMatrix[x][y]));
+            }
+        return pic;
     }
 
+    // width  of current picture
     public int width() {
-        return picture.width();
+        return width;
     }
 
+    // height of current picture
+    public int height() {
+        return height;
+    }
+
+
+    // sequence of indices for horizontal seam in current picture
+    public int[] findHorizontalSeam() {
+        // construct energy matrix by H x W
+        double[][] energyMatrix = toEnergyMatrix(height, width, true);
+        return findSeam(energyMatrix);
+    }
+
+    // sequence of indices for vertical   seam in current picture
+    public int[] findVerticalSeam() {
+        // construct energy matrix by W x H
+        double[][] energyMatrix = toEnergyMatrix(width, height, false);
+        return findSeam(energyMatrix);
+    }
+
+    public int[] findSeam(double[][] eMatrix) {
+        int W = eMatrix.length;
+        int H = eMatrix[0].length;
+
+        double[][] energyTo = new double[W][H];
+        int[][] edgeTo = new int[W][H];
+        int[] seam = new int[H];
+
+        // prepare energeTo:
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                energyTo[x][y] = (y == 0) ? 1000 : Double.POSITIVE_INFINITY;
+            }
+        }
+//        AcyclicSP
+        // relax all pixels in edgeTo:
+        for (int y = 0; y < H - 1; y++) {
+            for (int x = 0; x < W; x++) {
+                for (int w = x - 1; w <= x + 1; w++) {
+                    if (w >= 0 && w < W) {
+                        if (energyTo[w][y + 1] > energyTo[x][y] + eMatrix[w][y + 1]) {
+                            energyTo[w][y + 1] = energyTo[x][y] + eMatrix[w][y + 1];
+                            edgeTo[w][y + 1] = y * W + x;
+                        }
+                    }
+                }
+            }
+        }
+
+        IndexMinPQ<Double> floorQ = new IndexMinPQ<>(W);
+        // find the minimum index in last row
+        for (int x = 0; x < W; x++)
+            floorQ.insert(x, energyTo[x][H - 1]);
+
+        seam[H - 1] = floorQ.minIndex();
+
+        // back-track
+        for (int y = H - 1; y > 0; y--) {
+            seam[y - 1] = edgeTo[seam[y]][y] % W;
+        }
+
+        return seam;
+    }
+
+    // remove horizontal seam from current picture
+    public void removeHorizontalSeam(int[] horSeam) {
+        if (horSeam.length != width || height <= 1) throw new java.lang.IllegalArgumentException();
+
+        int[][] copy = new int[width][height - 1];
+
+        for (int x = 0; x < width; x++) {
+            System.arraycopy(colorMatrix[x], 0, copy[x], 0, horSeam[x]);
+            System.arraycopy(colorMatrix[x], horSeam[x] + 1, copy[x], horSeam[x], height - horSeam[x] - 1);
+        }
+
+        height--;
+        colorMatrix = copy;
+    }
+
+    // remove vertical seam from current picture
+    public void removeVerticalSeam(int[] vertSeam) {
+        if (vertSeam.length != height || width <= 1)
+            throw new java.lang.IllegalArgumentException();
+        //checkSeam(a);
+
+        int[][] copy = new int[width - 1][height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (x < vertSeam[y]) {
+                    copy[x][y] = colorMatrix[x][y];
+                } else if (x > vertSeam[y]) {
+                    copy[x - 1][y] = colorMatrix[x][y];
+                }
+            }
+        }
+
+        width--;
+        colorMatrix = copy;
+    }
+
+    private void checkSeam(int[] a) {
+        for (int i = 1; i < a.length; ++i) {
+            if (Math.abs(a[i - 1] - a[i]) > 1)
+                throw new IllegalArgumentException(
+                        "two adjacent entries differ by more than 1");
+        }
+    }
 
     public double energy(int col, int row) {
-        if (col == 0 || col == picture.width() - 1 || row == 0 || row == picture.height() - 1) {
+        if (col == 0 || col == width - 1 || row == 0 || row == height - 1) {
             return 1000;
         }
-        double sumOfXDeltaSquares = sumOfPixelsDeltasSquares(picture.get(col + 1, row), picture.get(col - 1, row));
-        double sumOfYDeltaSquares = sumOfPixelsDeltasSquares(picture.get(col, row + 1), picture.get(col, row - 1));
+        double sumOfXDeltaSquares = sumOfPixelsDeltasSquares(new Color(colorMatrix[col + 1][row]), new Color(colorMatrix[col - 1][row]));
+        double sumOfYDeltaSquares = sumOfPixelsDeltasSquares(new Color(colorMatrix[col][row + 1]), new Color(colorMatrix[col][row - 1]));
         return Math.sqrt(sumOfXDeltaSquares + sumOfYDeltaSquares);
     }
 
@@ -108,27 +159,17 @@ public class SeamCarver {
         int deltaR = col1.getRed() - col2.getRed();
         int deltaG = col1.getGreen() - col2.getGreen();
         int deltaB = col1.getBlue() - col2.getBlue();
-        return Math.pow(deltaR, 2) + Math.pow(deltaG, 2) + Math.pow(deltaB, 2);
-    }
-
-    public int[] findVerticalSeam() {
-        return new int[0];
+        return deltaR * deltaR + deltaG * deltaG + deltaB * deltaB;
     }
 
 
-    public int[] findHorizontalSeam() {
-        return new int[0];
+    private double[][] toEnergyMatrix(int W, int H, boolean needTranspose) {
+        double[][] result = new double[W][H];
+        for (int y = 0; y < H; y++)
+            for (int x = 0; x < W; x++) {
+                result[x][y] = needTranspose ? energy(y, x) : energy(x, y);
+            }
+        return result;
     }
 
-    public void removeHorizontalSeam(int[] horizontalSeam) {
-
-    }
-
-    public void removeVerticalSeam(int[] verticalSeam) {
-
-    }
-
-    public Picture picture() {
-        return picture;
-    }
 }
